@@ -8,7 +8,7 @@
 - [Nmap](./Nmap/README.md)
 - curl
 - openssl
-- ffuf
+- ffuf(./ffuf/README.me)
 - gobuster
 - whatweb
 - smbclient
