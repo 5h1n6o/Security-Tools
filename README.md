@@ -5,14 +5,19 @@
 ---
 # 📘 目次
 
-1. [Nmap](./Nmap/README.md)
-2. Wireshark
-3. Metasploit
-4. Burp Suite
-5. Ghidra / IDA
-6. pwntools
-7. Volatility
-8. impacket
+- [Nmap](./Nmap/README.md)
+- curl
+- openssl
+- ffuf
+- gobuster
+- smbclient
+- Wireshark
+- Metasploit
+- Burp Suite
+- Ghidra / IDA
+- pwntools
+- Volatility
+- impacket
    
 
 
