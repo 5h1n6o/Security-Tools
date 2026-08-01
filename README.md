@@ -3,18 +3,16 @@
 セキュリティツールの使い方を体系化したリポジトリです。
 
 ---
+# 📘 目次
 
-## 📘 章構成
-- Burp Suite  
-- Wireshark  
-- Ghidra / IDA  
-- pwntools  
-- Volatility  
-- impacket  
+1. Nmap
+2. Wireshark
+3. Metasploit
+4. Burp Suite
+5. Ghidra / IDA
+6. pwntools
+7. Volatility
+8. impacket
+   
 
----
-
-## 🎯 目的
-- ツールの使い方を体系化する  
-- 実戦的な手順を蓄積する  
 
