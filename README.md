@@ -6,12 +6,12 @@
 # 📘 目次
 
 - [Nmap](./Nmap/README.md)
-- curl
-- openssl
-- ffuf(./ffuf/README.me)
+- [curl](Curl/README.md)
+- [openssl](openssl/README.md)
+- [ffuf](./ffuf/README.me)
 - gobuster
-- whatweb
-- smbclient
+- [whatweb](whatweb/README.md)
+- [smbclient](smbclient/README.md)
 - Wireshark
 - Metasploit
 - Burp Suite
