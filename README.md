@@ -10,6 +10,7 @@
 - openssl
 - ffuf
 - gobuster
+- whatweb
 - smbclient
 - Wireshark
 - Metasploit
