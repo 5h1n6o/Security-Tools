@@ -1,6 +1,6 @@
 # Nmap実践ガイド（CTF・Pentest編）
 
-## 1. Nmapとは
+## Nmapとは
 
 * Nmapでできること
 * CTF・Pentestでの位置付け
@@ -8,7 +8,7 @@
 
 ---
 
-## 2. ホスト探索（Host Discovery）
+## ホスト探索（Host Discovery）
 
 * Ping Scan（`-sn`）
 * Pingを無視してスキャン（`-Pn`）
@@ -16,7 +16,7 @@
 
 ---
 
-## 3. ポートスキャン
+## ポートスキャン
 
 * TCP SYN Scan（`-sS`）
 * TCP Connect Scan（`-sT`）
@@ -27,7 +27,7 @@
 
 ---
 
-## 4. サービス・バージョン検出
+## サービス・バージョン検出
 
 * Version Detection（`-sV`）
 * Aggressive Version Detection（`--version-all`）
@@ -35,14 +35,14 @@
 
 ---
 
-## 5. OS検出
+## OS検出
 
 * OS Detection（`-O`）
 * 制限事項
 
 ---
 
-## 6. デフォルトスクリプト（NSE）
+## デフォルトスクリプト（NSE）
 
 * Default Script（`-sC`）
 * `default`カテゴリとは
@@ -50,7 +50,98 @@
 
 ---
 
-## 7. NSEスクリプトの活用
+## CTF・Pentestで頻出のオプション一覧
+
+| オプション      | 用途         | 使用頻度  |
+| ---------- | ---------- | ----- |
+| `-Pn`      | Pingを無視    | ★★★★★ |
+| `-p-`      | 全ポート       | ★★★★★ |
+| `-p`       | ポート指定      | ★★★★★ |
+| `-sC`      | デフォルトスクリプト | ★★★★★ |
+| `-sV`      | バージョン取得    | ★★★★★ |
+| `-O`       | OS検出       | ★★★★☆ |
+| `-sU`      | UDP        | ★★★☆☆ |
+| `-T4`      | 高速化        | ★★★★☆ |
+| `-oA`      | 結果保存       | ★★★★★ |
+| `--script` | NSE        | ★★★★☆ |
+
+
+## 実践でよく使うスキャン
+
+### 初回スキャン
+
+```bash
+nmap -Pn -sC -sV TARGET
+```
+
+### 全ポート
+
+```bash
+nmap -Pn -p- TARGET
+```
+
+### 全ポート＋詳細
+
+```bash
+nmap -Pn -p- -sC -sV TARGET
+```
+
+### UDP
+
+```bash
+nmap -sU TARGET
+```
+
+### OS検出
+
+```bash
+nmap -O TARGET
+```
+
+## 出力の保存
+
+* Normal（`-oN`）
+* XML（`-oX`）
+* Grepable（`-oG`）
+* All Format（`-oA`）
+
+## パフォーマンス調整
+
+* Timing（`-T4`）
+* Rate
+* Host Timeout
+* Min Rate
+
+※ 実践では `-T4` を覚えれば十分。
+
+## nmapオプション
+
+|オプション     |説明     |
+| --- | --- |
+| -v    | 詳細情報を出力   |
+| -n    | DNSによる名前解決をしない    |
+| -iL _filename_   | ホスト/ネットワークのリストから入力   |
+| -sL    | スキャンするターゲットをリストする    |
+| -Pn    | Pingスキャン行わない。    |
+| -sn    | Pingスキャンする。ポートスキャンは行わない    |
+| -PR    | ARPスキャンする。   |
+| -PE/PP/PM | ICMP Echo/time stamp/mask queryスキャンする。   |
+| -sV    | サービス/バージョン情報を検出する    |
+| -A    | OS検出とバージョン検出を有効にする    |
+| -sS/sT    | TCP SYNスキャン/接続スキャン    |
+| -sU    | UDPスキャン    |
+| -sN/sF/sX    | nullスキャン/Finスキャン/Xmasスキャン    |
+| -F    | スキャン対象ポートを100(デフォルトは1000)にして高速化する    |
+| -p[PORT]    | スキャンするポートを指定。-p- はフルポート指定    |
+| -T\<0-5\>    | タイミング テンプレートの設定 (大きいほど高速)     |
+| -sU    | UDPスキャン    |
+| --reason    | スキャンの結果(OpenやCloseなど)を結論付けた理由を出力    |
+| -sC    | --scritp=defaultと同じ    |
+| -oN _filename_   | スキャン結果をノーマル形式で filename に出力 |
+
+---
+
+## NSEスクリプトの活用
 
 ### NSEスクリプトの実行方法
 
@@ -105,100 +196,9 @@ NSEを実行するには、主に`--script`オプションを使用します。
 
 **注意点:** NSEスクリプト、特に`intrusive`や`exploit`カテゴリーのものは、ターゲットシステムに悪影響を及ぼす可能性があるため、実行前に必ず内容と影響を理解しておく必要があります。
 
-
-
 ---
 
-## 8. 実践でよく使うスキャン
-
-### 初回スキャン
-
-```bash
-nmap -Pn -sC -sV TARGET
-```
-
-### 全ポート
-
-```bash
-nmap -Pn -p- TARGET
-```
-
-### 全ポート＋詳細
-
-```bash
-nmap -Pn -p- -sC -sV TARGET
-```
-
-### UDP
-
-```bash
-nmap -sU TARGET
-```
-
-### OS検出
-
-```bash
-nmap -O TARGET
-```
-
----
-
-## 9. 出力の保存
-
-* Normal（`-oN`）
-* XML（`-oX`）
-* Grepable（`-oG`）
-* All Format（`-oA`）
-
----
-
-## 10. パフォーマンス調整
-
-* Timing（`-T4`）
-* Rate
-* Host Timeout
-* Min Rate
-
-※ 実践では `-T4` を覚えれば十分。
-
----
-
-## 11. CTF・Pentestで頻出のオプション一覧
-
-| オプション      | 用途         | 使用頻度  |
-| ---------- | ---------- | ----- |
-| `-Pn`      | Pingを無視    | ★★★★★ |
-| `-p-`      | 全ポート       | ★★★★★ |
-| `-p`       | ポート指定      | ★★★★★ |
-| `-sC`      | デフォルトスクリプト | ★★★★★ |
-| `-sV`      | バージョン取得    | ★★★★★ |
-| `-O`       | OS検出       | ★★★★☆ |
-| `-sU`      | UDP        | ★★★☆☆ |
-| `-T4`      | 高速化        | ★★★★☆ |
-| `-oA`      | 結果保存       | ★★★★★ |
-| `--script` | NSE        | ★★★★☆ |
-
----
-
-### 1.1 Nmap（最重要）
-
-#### 主なスキャン
-```
-nmap -p- -T4 -v <TARGET>
-nmap -sC -sV -O -T4 <TARGET>
-nmap --script vuln <TARGET>
-```
-
-#### 確認ポイント
-- 開いているポート  
-- サービスの種類  
-- バージョン（古いほど exploit が多い）  
-- Web / SMB / FTP / SSH の有無  
-- 内部 Web（8080/8000/5000）  
-- DB（3306 / 5432）  
-- Redis（6379）  
-
-#### 頻出ポート
+## 頻繁に検出されるポート
 | Port / Service | Attack Vector（攻撃の糸口） | Next Action（次のアクション） |
 | :--- | :--- | :--- |
 | **21 / FTP** | Anonymousログイン、書き込み権限、ソース露出, | `anonymous`ログインの試行,,, ファイル一覧の確認とダウンロード,, バナーからのバージョン特定 |
@@ -224,7 +224,7 @@ nmap --script vuln <TARGET>
 
 ---
 
-## 12. 攻撃フローでのNmapの使い方
+## 攻撃フローでのNmapの使い方
 
 ```text
 Reconnaissance
