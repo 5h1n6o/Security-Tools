@@ -7,9 +7,9 @@
 
 - Burp Suite
 - [curl](Curl/README.md)
-- [ffuf](./ffuf/README.me)
+- [ffuf](./ffuf/README.md)
 - Ghidra
-- gobuster
+- [gobuster](./gobuster/README.md)
 - impacket
 - IDA
 - Metasploit
