@@ -15,6 +15,7 @@
 - [hashcat](/hashcat/README.md)
 - [impacket](/impacket/README.md)
 - [John the Ripper](/John%20the%20Ripper/README.md)
+- [ldapsearch](/ldapsearch/README.md)
 - [Metasploit](/Metasploit/README.md)
 - [netcat](/netcat/README.md)
 - [netexec](netexec/README.md)
