@@ -5,7 +5,7 @@
 ---
 # 📘 目次
 
-- [Burp Suite](Burp-Suite/README.md)
+- [Burp Suite](Burp%20Suite/README.md)
 - [curl](Curl/README.md)
 - [dnsrecon](dnsrecon/README.md)
 - [enum4linux-ng](/enum4linux-ng/README.md)
