@@ -20,7 +20,7 @@
 - [netexec](netexec/README.md)
 - [Nmap](./Nmap/README.md)
 - [openssl](openssl/README.md)
-- pwntools
+- [pwntools](/pwntools/README.md)
 - [rpcclient](/rpcclient/README.md)
 - [smbclient](smbclient/README.md)
 - [smbmap](smbmap/README.md)
