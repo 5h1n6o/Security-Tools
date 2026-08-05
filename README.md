@@ -13,16 +13,16 @@
 - Ghidra
 - [gobuster](./gobuster/README.md)
 - impacket
-- IDA
 - [Metasploit](/Metasploit/README.md)
 - [netcat](/netcat/README.md)
 - [netexec](netexec/README.md)
 - [Nmap](./Nmap/README.md)
 - [openssl](openssl/README.md)
 - pwntools
-- [whatweb](whatweb/README.md)
+- [rpcclient](/rpcclient/README.md)
 - [smbclient](smbclient/README.md)
 - [smbmap](smbmap/README.md)
+- [whatweb](whatweb/README.md)
 - Wireshark
 - Volatility
 
