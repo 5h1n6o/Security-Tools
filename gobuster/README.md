@@ -1,731 +1,191 @@
-# 1. Basic Information（基本情報）
+# gobuster
 
-## Tool Name
-
-正式名称：
-
-**Gobuster**
-
-公式リポジトリ：
-
-https://github.com/OJ/gobuster
-
-開発言語：
-
-- Go
+## 🎯 概要
+**Gobuster**は、Go言語で記述された、URI（ディレクトリやファイル）やDNSサブドメイン、仮想ホスト（VHost）を高速に探索するためのオープンソースのブルートフォース（総当たり）ツールです。ペネトレーションテストやOSCPにおいて、ターゲットのWebサーバー上に存在する「隠しディレクトリ」や「バックアップファイル」、「公開されていないAPIエンドポイント」を特定する**列挙（Enumeration）**フェーズで最も多用されるツールの一つです。Go製であるため非常に軽量かつ並列処理に優れており、限られた時間内で広範な攻撃対象領域（Attack Surface）をマッピングする際に真価を発揮します。
 
 ---
 
-## Overview
-
-`gobuster` は、Webサイトやネットワークサービスに対して高速な列挙（Enumeration）を行うためのツールです。
-
-主に以下の用途で利用されます。
-
-- Webディレクトリ探索
-- ファイル探索
-- DNSサブドメイン列挙
-- Virtual Host探索
-- Amazon S3バケット探索
-- TFTPサーバ探索
-
-Pentest、CTF、OSCP試験対策で頻繁に利用される代表的なEnumerationツールです。
+## 🛠 代表的な用途
+- **Webディレクトリ・ファイルの列挙**: 公開されていない管理画面（`/admin`）や設定ファイル（`.env`）の特定。
+- **DNSサブドメインの探索**: 組織が所有する未公開のサブドメインや開発環境の発見。
+- **APIエンドポイントの発見**: パターンファイルを用いたAPIバージョンやリソースの特定。
+- **仮想ホスト（VHost）の特定**: 同一IPアドレス上で動作する複数のドメインの判別。
+- **OSCPでの利用ポイント**: 列挙の初期段階で必ずと言っていいほど実行されます。特に、Nmapで見つかったWebポートに対して、標準的なワードリスト（`common.txt`や`directory-list-2.3-medium.txt`）を用いて構造を把握するために使用されます。
 
 ---
 
-## Purpose
+## 🔍 基本コマンド
+```bash
+# 基本的なディレクトリ探索（dirモード）
+gobuster dir -u http://10.10.10.1/ -w /usr/share/wordlists/dirb/common.txt
 
-Gobusterの目的：
+# DNSサブドメインの探索（dnsモード）
+gobuster dns -d target.local -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt
 
-- WebアプリケーションのHidden Resource発見
-- Attack Surface Discovery
-- サブドメイン列挙
-- 未公開ファイル・ディレクトリ発見
-- セキュリティ診断時の初期Recon
-
----
-
-## Main Use Cases
-
-### Reconnaissance
-
-対象環境の情報収集。
-
-例：
-
-- Web Directory Discovery
-- Subdomain Discovery
+# VHost（仮想ホスト）の探索（vhostモード）
+gobuster vhost -u http://target.local -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt
+```
 
 ---
 
-### Enumeration
-
-対象：
-
-- `/admin`
-- `/backup`
-- `/uploads`
-- `/api`
-
-などの隠されたリソース探索。
+## 🧪 よく使う攻撃シナリオ
+- **隠しバックアップ・設定ファイルの特定**: `-x` オプションで `php,bak,txt,zip,old` などの拡張子を指定し、開発者が残した機密ファイルを一斉に検索します。
+- **API構造の総当たり**: `{GOBUSTER}/v1` のようなプレースホルダを含むパターンファイルを使用し、APIのバージョンや階層構造を効率的に特定します。
+- **ディレクトリ階層の深掘り**: 特定されたディレクトリ（例：`/secret`）に対して再度Gobusterを実行し、ネストされた隠しリソースを段階的に暴きます。
 
 ---
 
-### Web Assessment
+## 📌 フェーズ別コマンド例  
 
-発見対象：
+### 🔎 Reconnaissance（技術的偵察）
+```bash
+# DNSのブルートフォースにより組織の公開されていないホスト名を特定
+gobuster dns -d example.com -w /usr/share/wordlists/dnsmap.txt
 
-- 管理画面
-- 設定ファイル
-- バックアップファイル
-- 古いアプリケーション
-
----
-
-### DNS Enumeration
-
-例：
-
-```text
-dev.example.com
-test.example.com
-admin.example.com
-````
-
-などのサブドメイン探索。
+# IPアドレスを直接叩き、Hostヘッダーを操作して内部向けの仮想ホストを発見
+gobuster vhost -u http://10.10.10.1 -w /usr/share/wordlists/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt
+```
 
 ---
 
-## Installation
+### 🧭 Enumeration（外部サービスの詳細調査）
+```bash
+# 標準的なワードリストを用いて共通のディレクトリパスを列挙
+gobuster dir -u http://192.168.50.20/ -w /usr/share/wordlists/dirb/common.txt
 
-## Linux
+# 5つのスレッドを指定し、サーバー負荷を抑えつつディレクトリを探索
+gobuster dir -u http://192.168.50.20 -w /usr/share/wordlists/dirb/common.txt -t 5
 
-### Kali Linux
+# 拡張子を指定して、特定のファイル形式（PHP, PDF, Config）に絞ってスキャン
+gobuster dir -u http://192.168.50.242 -w /usr/share/wordlists/dirb/common.txt -x txt,pdf,config
+
+# パターンファイルを利用してAPIエンドポイント（例：/api/v1/users）を高速特定
+gobuster dir -u http://192.168.50.16:5002 -w /usr/share/wordlists/dirb/big.txt -p pattern_file
+```
+
+---
+
+### 🚪 Initial Access（初期侵入）
+```bash
+# 8080ポートで動作するテスト環境などに対し、ログイン画面やバックアップファイルを探索
+gobuster dir -u http://192.168.56.107:8080/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -x php,html,txt
+
+# robots.txtで拒否されている可能性のある隠しディレクトリを手動リストで再確認
+gobuster dir -u http://target.local/ -w custom_list.txt
+```
+
+---
+
+### 📈 Privilege Escalation（権限昇格）
+基本的に関連なし。ただし、侵入後にローカルのWeb管理インターフェース（127.0.0.1のみ許可されているものなど）の構造を調査する際に、ポートフォワーディングと組み合わせて使用されることがあります。
+
+---
+
+### 🏢 Active Directory（AD）
+基本的に関連なし。ただし、AD環境内の内部Webサイトや、ドメインコントローラーがホストしている公開ディレクトリの列挙に使用されることがあります。
+
+---
+
+## 🧰 便利オプション一覧
+- `dir`：ディレクトリ・ファイル列挙モード。
+- `dns`：DNSサブドメイン列挙モード。
+- `vhost`：仮想ホスト列挙モード。
+- <code>-u</code>：ターゲットURL。
+- <code>-w</code>：ワードリスト（辞書）のパス。
+- <code>-x</code>：検索対象の拡張子リスト（例：`php,txt,html`）。
+- <code>-t</code>：実行スレッド数（デフォルト10）。速度を上げたい場合は増やす。
+- <code>-p</code>：パターンファイルのパス。`{GOBUSTER}`プレースホルダを使用。
+- <code>-o</code>：結果を指定したファイルに出力。
+- <code>-k</code>：SSL/TLSの証明書検証をスキップ（自己署名証明書の場合に必須）。
+- <code>-s</code>：ポジティブなステータスコードの指定（例：`200,204,301,302,307,403`）。
+- <code>-b</code>：除外したいステータスコード（例：`404`）。
+
+---
+
+## 🚀 実践例
 
 ```bash
-sudo apt update
-sudo apt install gobuster
-```
+# 【1】OSCP環境でよく使われる標準的な高速ディレクトリ列挙
+gobuster dir -u http://192.168.56.112:80/ -w /usr/share/wordlists/dirb/common.txt -t 20
 
-確認：
+# 【2】特定のWebアプリ（WordPress等）の構成ファイルを拡張子付きで探索
+gobuster dir -u http://target.local/blog -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x php,txt,html,js
 
-```bash
-gobuster version
-```
+# 【3】APIサーバーのバージョンアップに伴うエンドポイントの変更をパターンで特定
+# pattern_fileの内容: {GOBUSTER}/v1, {GOBUSTER}/v2
+gobuster dir -u http://api.target.local -w words.txt -p pattern_file
 
----
+# 【4】サブディレクトリで見つかった「/secret」などを起点に深掘りスキャン
+gobuster dir -u http://192.168.56.109/secret/ -w /usr/share/wordlists/dirb/common.txt -x php,txt
 
-### Go Install
+# 【5】403 Forbidden（アクセス拒否）が出るパスも、リソースが存在する証拠として記録
+gobuster dir -u http://target.local -w common.txt -s "200,204,301,302,403"
 
-```bash
-go install github.com/OJ/gobuster/v3@latest
-```
+# 【6】自己署名証明書（HTTPS）を使用している古いサーバーを強制スキャン
+gobuster dir -u https://192.168.1.50 -w /usr/share/wordlists/dirb/common.txt -k
 
-PATH追加：
+# 【7】巨大なワードリストを使用し、出力を後で解析するために保存
+gobuster dir -u http://target.local -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -o gobuster_results.txt
 
-```bash
-export PATH=$PATH:$HOME/go/bin
-```
+# 【8】.htaccess や .htpasswd などのドットファイルを重点的に探索
+gobuster dir -u http://target.local -w /usr/share/wordlists/dirb/common.txt -a "Mozilla/5.0"
 
----
+# 【9】特定のディレクトリ配下にバックアップファイル（.bak, .old）がないか一斉調査
+gobuster dir -u http://target.local/config/ -w /usr/share/wordlists/dirb/common.txt -x bak,old,save,tmp
 
-## macOS
-
-Homebrew：
-
-```bash
-brew install gobuster
-```
-
----
-
-## Windows
-
-Chocolatey：
-
-```powershell
-choco install gobuster
-```
-
-またはGo：
-
-```powershell
-go install github.com/OJ/gobuster/v3@latest
+# 【10】環境変数 $URL を用いたスクリプト内での自動列挙
+gobuster dir -u $URL -w /usr/share/wordlists/dirb/common.txt
 ```
 
 ---
 
-## Basic Syntax
-
-基本構文：
-
-```bash
-gobuster <mode> [options]
-```
-
-例：
-
-```bash
-gobuster dir \
--u http://target.com \
--w wordlist.txt
-```
+## 🧩 他ツールとの組み合わせ
+- **ffuf** → Gobusterはパスの探索に特化している一方、ffufはパラメータやヘッダーのより複雑なファジングに適しています。パス探索はGobuster、パラメータ特定はffufと使い分けるのが効率的です。
+- **nmap** → Nmapの `-sV` オプションでWebサーバーを特定した後、そのポートをGobusterに引き継いで内部構造を明らかにします。
+- **Nikto** → NiktoでWebサーバーの全体的な脆弱性や既知の構成ミスをスキャンした後、GobusterでNiktoの辞書に載っていない独自の隠しリソースを深掘りします。
+- **Burp Suite** → Gobusterで特定した「ステータスコード200や403」のURLをBurpのRepeaterに送り、手動で詳細なリクエスト分析を行います。
 
 ---
 
-| 要素   | 説明          |
-| ---- | ----------- |
-| mode | 探索種類        |
-| -u   | Target URL  |
-| -w   | Wordlist    |
-| -x   | Extension指定 |
-| -t   | Thread数     |
-| -o   | Output      |
+## 📝 注意点（OSCP 試験での使い方）
+- **速度の調整**: デフォルトのスレッド数（`-t 10`）は多くの場合安全ですが、ターゲットが低スペックな仮想マシンの場合、リクエストが速すぎるとDoS状態になりサービスが落ちる（あるいは自分のIPがBANされる）ことがあります。応答が不安定な場合はスレッド数を下げてください。
+- **ワードリストの選定**: 最初から巨大なリスト（`directory-list-2.3-medium.txt`など）を使うと時間がかかりすぎます。まずは `common.txt` などの軽量なリストで構造を把握するのがセオリーです。
+- **ワイルドカードDNS**: DNSモードで全てのドメインが同一IPを返す「ワイルドカード設定」がされている場合、Gobusterは全ての結果を「ヒット」として返してしまいます。この場合は誤検知をフィルタリングする設定が必要です。
 
 ---
 
-# 2. How It Works（仕組み）
-
-GobusterはWordlistを利用して大量のリクエストを生成し、対象サーバからのレスポンスを解析します。
-
-基本処理：
-
-```
-          Wordlist
-              |
-              |
-              v
-        Gobuster Engine
-              |
-              |
-      HTTP/DNS Request
-              |
-              |
-              v
-          Target
-              |
-              |
-      Response Analysis
-              |
-              |
-        Found Resource
-```
+## 🔗 参考リンク
+- 公式：[Gobuster GitHub Repository](https://github.com/OJ/gobuster)
+- 良質解説：[Gobuster Usage Guide (OJ Reeves)](https://github.com/OJ/gobuster#usage)
 
 ---
 
-## Directory Mode 動作例
+## 📝 補足（Notes）
 
-Wordlist：
+Webアプリケーションの偵察や列挙フェーズで頻用される**ffuf**と**gobuster**について、それぞれの違いや得意とするポイント、使いどころを比較表にまとめました。
 
-```
-admin
-backup
-login
-test
-```
-
-実行：
-
-```bash
-gobuster dir \
--u http://target.com \
--w wordlist.txt
-```
-
-生成：
-
-```
-http://target.com/admin
-http://target.com/backup
-http://target.com/login
-http://target.com/test
-```
+| 比較項目 | **gobuster** | **ffuf** |
+| :--- | :--- | :--- |
+| **ツールの本質** | **列挙（Enumeration）**に特化したブルートフォースツール | 非常に高速かつ柔軟な**Webファジング**フレームワーク |
+| **開発言語** | **Go言語**（高速・軽量） | **Go言語**（極めて高速） |
+| **得意な探索** | ディレクトリ、ファイル、DNS、VHostの**高速な総当たり** | パラメータ名、ヘッダー値、POSTデータなど、**リクエストのあらゆる箇所のファジング** |
+| **柔軟性** | `dir`、`dns`、`vhost`などの**モードベース**で使い勝手がシンプル | `FUZZ`キーワードを任意の位置に配置でき、**リクエストの微調整**が容易 |
+| **主な用途** | ターゲットのWebサイト構造（`/admin`など）やAPIパスの**迅速なマッピング** | 隠しパラメータの発見、複雑なリクエストが必要な脆弱性検証、APIの全数調査 |
+| **OSCP/試験での利点** | 列挙の初期段階で全ポートスキャン後のパス特定を**素早く行う**のに最適 | Burp Intruder（無料版）の**速度制限を回避する代替手段**として非常に強力 |
 
 ---
 
-## 使用プロトコル
-
-対応：
-
-* HTTP
-* HTTPS
-* DNS
-* S3
-* TFTP
-
----
-
-# 3. Command Structure（コマンド構造）
-
-基本構造：
-
-```bash
-gobuster <mode> [options]
-```
-
-例：
-
-```bash
-gobuster dir \
--u https://example.com \
--w /usr/share/wordlists/dirb/common.txt
-```
-
----
-
-| 要素    | 説明                         |
-| ----- | -------------------------- |
-| dir   | Directory/File Enumeration |
-| dns   | DNS Subdomain Enumeration  |
-| vhost | Virtual Host Enumeration   |
-| s3    | Amazon S3 Enumeration      |
-| fuzz  | URL Fuzzing                |
-| tftp  | TFTP Enumeration           |
-
----
-
-# 4. Options Reference（オプション一覧）
-
-## General Options
-
-| Option | Long Option   | Description | Frequency | Example                             |
-| ------ | ------------- | ----------- | --------- | ----------------------------------- |
-| -u     | --url         | Target URL  | ★★★★★     | -u [https://target](https://target) |
-| -w     | --wordlist    | Wordlist指定  | ★★★★★     | -w word.txt                         |
-| -t     | --threads     | Thread数     | ★★★★★     | -t 50                               |
-| -o     | --output      | 結果保存        | ★★★★☆     | -o result.txt                       |
-| -q     | --quiet       | バナー非表示      | ★★★☆☆     | -q                                  |
-| -z     | --no-progress | Progress非表示 | ★★★☆☆     | -z                                  |
-
----
-
-# Output Options
-
-| Option | Description | Example         |
-| ------ | ----------- | --------------- |
-| -o     | Output File | `-o result.txt` |
-| -q     | Quiet Mode  | `-q`            |
-
----
-
-# Directory Mode Options
-
-| Option | Description      | Example          |
-| ------ | ---------------- | ---------------- |
-| -x     | Extension指定      | `-x php,txt`     |
-| -r     | Redirect追跡       | `-r`             |
-| -e     | Full URL表示       | `-e`             |
-| -s     | Status Code指定    | `-s 200,301,403` |
-| -b     | Blacklist Status | `-b 404`         |
-
----
-
-# Performance Options
-
-| Option | Description | Example      |
-| ------ | ----------- | ------------ |
-| -t     | Thread数     | `-t 100`     |
-| -delay | Request間隔   | `--delay 1s` |
-
----
-
-# DNS Mode Options
-
-| Option | Description  | Example          |
-| ------ | ------------ | ---------------- |
-| -d     | Domain指定     | `-d example.com` |
-| -r     | DNS Resolver | `-r 8.8.8.8`     |
-
----
-
-# Advanced Options
-
-| Option | Description  | Example                    |
-| ------ | ------------ | -------------------------- |
-| -k     | TLS証明書無視     | `-k`                       |
-| -H     | Header追加     | `-H "Cookie:xxx"`          |
-| -U     | User Agent指定 | `-U Mozilla`               |
-| -p     | Proxy指定      | `-p http://127.0.0.1:8080` |
-
----
-
-# 5. Frequently Used Commands TOP10（使用頻度TOP10）
-
-| Rank | Command                                         | Purpose           | Frequency |
-| ---- | ----------------------------------------------- | ----------------- | --------- |
-| 1    | `gobuster dir -u URL -w WORDLIST`               | Directory Scan    | ★★★★★     |
-| 2    | `gobuster dir -u URL -w WORDLIST -x php,txt`    | Extension Scan    | ★★★★★     |
-| 3    | `gobuster dir -u URL -w WORDLIST -t 50`         | 高速Scan            | ★★★★★     |
-| 4    | `gobuster dns -d domain.com -w subdomains.txt`  | Subdomain Scan    | ★★★★★     |
-| 5    | `gobuster vhost -u URL -w hosts.txt`            | Virtual Host Scan | ★★★★☆     |
-| 6    | `gobuster dir -u URL -w WORDLIST -x bak,old`    | Backup探索          | ★★★★☆     |
-| 7    | `gobuster dir -u URL -w WORDLIST -s 200,403`    | Status指定          | ★★★★☆     |
-| 8    | `gobuster dir -u URL -w WORDLIST -k`            | SSL無視             | ★★★☆☆     |
-| 9    | `gobuster dir -u URL -w WORDLIST -o result.txt` | 結果保存              | ★★★☆☆     |
-| 10   | `gobuster s3 -w WORDLIST`                       | S3探索              | ★★★☆☆     |
-
----
-
-# Example 1
-
-## Directory Discovery
-
-Command:
-
-```bash
-gobuster dir \
--u http://target.com \
--w /usr/share/wordlists/dirb/common.txt
-```
-
-Purpose:
-
-Webディレクトリ探索。
-
-When to use:
-
-初期Recon。
-
-Important Point:
-
-404レスポンスを除外する設定が重要。
-
----
-
-# Example 2
-
-## PHP File Discovery
-
-Command:
-
-```bash
-gobuster dir \
--u http://target.com \
--w wordlist.txt \
--x php,txt,bak
-```
-
-Purpose:
-
-PHPファイルやバックアップファイル探索。
-
----
-
-# 6. Common Usage Examples（実践例）
-
-## Basic Usage
-
-```bash
-gobuster dir \
--u https://target.com \
--w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
-```
-
-説明：
-
-一般的なWeb Directory Enumeration。
-
----
-
-## Troubleshooting
-
-```bash
-gobuster dir \
--u https://target.com \
--w wordlist.txt \
--b 404
-```
-
-説明：
-
-404ページによるFalse Positive除外。
-
----
-
-## Advanced Usage
-
-```bash
-gobuster dir \
--u https://target.com \
--w wordlist.txt \
--x php,html,bak \
--t 100 \
--k
-```
-
-説明：
-
-高速な詳細探索。
-
----
-
-## Automation Example
-
-```bash
-#!/bin/bash
-
-gobuster dir \
--u $1 \
--w /usr/share/wordlists/common.txt \
--o gobuster_result.txt
-```
-
----
-
-# 7. Output Interpretation（結果の読み方）
-
-例：
-
-```
-/admin              (Status: 200)
-/backup             (Status: 403)
-/login.php          (Status: 200)
-```
-
-解析：
-
-| 結果      | 意味       |
-| ------- | -------- |
-| 200     | 存在確認     |
-| 301/302 | Redirect |
-| 403     | 存在するが拒否  |
-| 404     | 不存在      |
-
----
-
-重要ポイント：
-
-403は重要。
-
-理由：
-
-```
-存在する
-↓
-アクセス制限
-↓
-認証突破対象になる可能性
-```
-
----
-
-# 8. Practical Scenarios（実践シナリオ）
-
-## Scenario 1
-
-状況：
-
-Webサーバの隠しディレクトリを探したい。
-
-目的：
-
-Attack Surface Discovery。
-
-使用コマンド：
-
-```bash
-gobuster dir \
--u http://target \
--w common.txt
-```
-
-確認ポイント：
-
-* admin
-* login
-* backup
-* upload
-
----
-
-## Scenario 2
-
-状況：
-
-サブドメイン探索。
-
-目的：
-
-DNS Enumeration。
-
-使用コマンド：
-
-```bash
-gobuster dns \
--d target.com \
--w subdomains.txt
-```
-
----
-
-# 9. Troubleshooting Guide（障害対応）
-
-| 症状        | 原因                | 確認方法     | 解決方法   |
-| --------- | ----------------- | -------- | ------ |
-| 結果が大量     | Wildcard Response | サイズ比較    | -b設定   |
-| 遅い        | Thread不足          | CPU確認    | -t増加   |
-| SSL Error | 証明書問題             | -k利用     | 証明書確認  |
-| 404大量     | Filter不足          | Status確認 | -b 404 |
-
----
-
-# 10. Security Considerations（セキュリティ）
-
-## 攻撃側利用
-
-用途：
-
-* Hidden Directory Discovery
-* Backup File Discovery
-* Subdomain Discovery
-
----
-
-## 防御側観点
-
-ログに残る情報：
-
-* 大量GET Request
-* 多数404
-* 同一User-Agent
-
-対策：
-
-* Rate Limit
-* WAF
-* IDS監視
-* 不要ファイル削除
-
----
-
-# 11. Related Commands / Tools（関連ツール）
-
-## Alternative Tools
-
-| Tool        | 用途                  |
-| ----------- | ------------------- |
-| ffuf        | 高速Fuzzing           |
-| dirsearch   | Web Enumeration     |
-| feroxbuster | Directory Discovery |
-| wfuzz       | Web Fuzzing         |
-
----
-
-## Complementary Tools
-
-| Tool       | 用途             |
-| ---------- | -------------- |
-| nmap       | Port Scan      |
-| httpx      | HTTP Probe     |
-| nikto      | Web Scanner    |
-| Burp Suite | Manual Testing |
-
----
-
-## Next Step Tools
-
-推奨学習順：
-
-```
-nmap
- ↓
-httpx
- ↓
-gobuster
- ↓
-ffuf
- ↓
-Burp Suite
- ↓
-Manual Exploitation
-```
-
----
-
-# 12. Cheat Memory（覚え方）
-
-## Mode
-
-覚え方：
-
-```
-dir = Directory
-dns = Domain
-vhost = Virtual Host
-```
-
----
-
-## 必須オプション
-
-```
--u  URL
--w  Wordlist
--t  Thread
--x  Extension
--o  Output
-```
-
-覚え方：
-
-```
-URL + Wordlist + Thread + Extension
-```
-
----
-
-# 13. Quick Reference（クイックリファレンス）
-
-## 基本構文
-
-```bash
-gobuster dir -u URL -w WORDLIST
-```
-
----
-
-## TOP Commands
-
-```bash
-# Directory Scan
-gobuster dir -u http://target -w wordlist.txt
-
-# Extension Scan
-gobuster dir -u http://target -w wordlist.txt -x php,txt
-
-# DNS Scan
-gobuster dns -d target.com -w subdomains.txt
-
-# VHost Scan
-gobuster vhost -u http://target -w hosts.txt
-
-# 高速Scan
-gobuster dir -u URL -w wordlist.txt -t 100
-```
-
----
-
-## 必須オプション
-
-| Option | 用途         |
-| ------ | ---------- |
-| -u     | URL        |
-| -w     | Wordlist   |
-| -t     | Thread     |
-| -x     | Extension  |
-| -o     | Output     |
-| -s     | Status指定   |
-| -k     | SSL Ignore |
-
----
-
-# 14. Personal Notes
-
-```markdown
-## My Notes
-
-- 
-- 
-- 
-```
-
+### それぞれの使いどころとポイント
+
+#### **gobuster の使いどころ**
+*   **初期調査の迅速化**: Webサーバーを発見した直後、どのようなディレクトリやファイルが公開されているか、標準的なワードリストを使って**短時間で構造を把握**したい場合に最適です。
+*   **APIエンドポイントの特定**: `{GOBUSTER}`というプレースホルダとパターンファイルを使用することで、`/api/v1/resource`のような**バージョン管理されたAPIパス**を効率的に列挙できます。
+*   **特定モードの活用**: DNSモードを用いて、組織の**未公開サブドメイン**を高速に列挙する際にも威力を発揮します。
+
+#### **ffuf の使いどころ**
+*   **複雑なリクエストの検証**: HTTPリクエストのヘッダー（`X-Forwarded-For: FUZZ`など）やCookie、メッセージボディを**動的に変更しながらテスト**したい場面で非常に強力です。
+*   **隠しパラメータの発見**: GETリクエストのパラメータ名自体をファジングして、ドキュメント化されていない**隠しオプションやデバッグ用引数**を探すのに適しています。
+*   **大規模な辞書攻撃**: Burp Suite CEのIntruderよりもはるかに高速にリクエストを送信できるため、**数万ワード規模の辞書**を用いた列挙を無料で行いたい場合に推奨されます。
+
+### 結論
+単純にWebサイトの**隠しパスやDNS情報をリストアップ**したいなら**gobuster**、パラメータの特定やカスタムヘッダーの操作など、**高度で柔軟なリクエスト改ざん**が必要なら**ffuf**を使用するのが最も効率的です。
