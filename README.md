@@ -7,6 +7,7 @@
 
 - [Burp Suite](Burp Suite/README.md)
 - [curl](Curl/README.md)
+- [dnsrecon](dnsrecon/README.md)
 - [ffuf](./ffuf/README.md)
 - Ghidra
 - [gobuster](./gobuster/README.md)
