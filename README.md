@@ -14,7 +14,7 @@
 - [gobuster](./gobuster/README.md)
 - impacket
 - IDA
-- Metasploit
+- [Metasploit](/Metasploit/README.md)
 - [netcat](/netcat/README.md)
 - [netexec](netexec/README.md)
 - [Nmap](./Nmap/README.md)
