@@ -5,7 +5,7 @@
 ---
 # 📘 目次
 
-- Burp Suite
+- [Burp Suite](Burp Suite/README.md)
 - [curl](Curl/README.md)
 - [ffuf](./ffuf/README.md)
 - Ghidra
