@@ -19,6 +19,7 @@
 - pwntools
 - [whatweb](whatweb/README.md)
 - [smbclient](smbclient/README.md)
+- [smbmap](smbmap/README.md)
 - Wireshark
 - Volatility
 
