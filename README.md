@@ -12,7 +12,8 @@
 - [ffuf](./ffuf/README.md)
 - Ghidra
 - [gobuster](./gobuster/README.md)
-- impacket
+- [hashcat](/hashcat/README.md)
+- [impacket](/impacket/README.md)
 - [Metasploit](/Metasploit/README.md)
 - [netcat](/netcat/README.md)
 - [netexec](netexec/README.md)
