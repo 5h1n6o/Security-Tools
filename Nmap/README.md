@@ -294,8 +294,26 @@ nmap --script http-headers <target>
 # [HTTP] robots.txt ファイルから隠しパスを抽出
 nmap --script http-robots.txt <target>
 
+# [SMB] SMBのセキュリティレベルに関する情報を確認
+nmap -p 445 --script smb-security-mode <target>
+
+# [SMB] SMB共有を通じてシステムにログインしたユーザーを列挙
+nmap -p 445 --script smb-enum-sessions <target>
+
+# [SMB] 有効な認証情報を使ってシステムにログインしたユーザーを列挙
+nmap -p 445 --script smb-enum-sessions --script-args smbusername=administrator,smbpassword=smb_55 <target>
+
 # [SMB] Windowsのバージョン、ドメイン名、共有フォルダーを特定
 nmap -p 445 --script "smb-os-discovery,smb-enum-shares" <target>
+
+# [SMB] 利用可能なドメインを列挙
+nmap -p 445 --script smb-enum-domains --script-args smbusername=administrator,smbpassword=smb_55 <target>
+
+# [SMB] 利用可能なユーザーグループを列挙
+nmap -p 445 --script smb-enum-groups --script-args smbusername=administrator,smbpassword=smb_55 <target>
+
+# [SMB] 利用可能なサービスを列挙
+nmap -p 445 --script smb-enum-services --script-args smbusername=administrator,smbpassword=smb_55 <target>
 
 # [DNS] DNSサーバーからゾーン転送（AXFR）を試行
 nmap -p 53 --script dns-zone-transfer --script-args dns-zone-transfer.domain=<domain> <target>
